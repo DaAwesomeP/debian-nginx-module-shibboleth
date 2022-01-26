@@ -71,7 +71,7 @@ jobs:
       - name: Build nginx-module-shibboleth versions
         shell: bash
         run: |
-          while IFS="" read -r THIS_NGINX_VERSION || [ -n "$THIS_NGINX_VERSION" ] do
+          while IFS="" read -r THIS_NGINX_VERSION || [ -n "$THIS_NGINX_VERSION" ]; do
             ./build_module.sh --non-interactive --force-dynamic -v $THIS_NGINX_VERSION --module-version ${{ steps.nginx-module-shibboleth-latest-release.outputs.version }} -o build-module-artifacts  nginx-http-shibboleth
           done < nginx-versions-${{ matrix.os.release }}-${{ matrix.nginx-branch.name}}.txt
       - name: SHA256 build artifacts
