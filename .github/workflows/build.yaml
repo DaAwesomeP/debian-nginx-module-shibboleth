@@ -27,7 +27,8 @@ jobs:
       - name: Add Nginx repo key
         run: >
           curl https://nginx.org/keys/nginx_signing.key | gpg --dearmor | sudo tee /usr/share/keyrings/nginx-archive-keyring.gpg > /dev/null &&
-          gpg --dry-run --list-options show-keyring /usr/share/keyrings/nginx-archive-keyring.gpg
+          gpg --import-options show-only --import /usr/share/keyrings/nginx-archive-keyring.gpg &&
+          gpg --with-colons --import-options show-only --import /usr/share/keyrings/nginx-archive-keyring.gpg
       - name: Add Nginx repo
         run: >
           echo "deb [signed-by=/usr/share/keyrings/nginx-archive-keyring.gpg] http://nginx.org/packages/${{ matrix.nginx-branch.repo-path }}debian `lsb_release -cs` nginx" | sudo tee /etc/apt/sources.list.d/nginx.list &&
