@@ -61,7 +61,7 @@ jobs:
           echo "::set-output name=tag::$(git describe --tags --abbrev=0 | tee ../nginx-module-shibboleth-tag.txt)" &&
           echo "::set-output name=version::$(git describe --tags --abbrev=0 | sed -e '/v/s/^.//' 2>&1 | tee ../nginx-module-shibboleth-version.txt)" &&
           cd ../ &&
-          sha256sum nginx-module-shibboleth-tag.txt
+          sha256sum nginx-module-shibboleth-tag.txt &&
           sha256sum nginx-module-shibboleth-version.txt
       - name: Checkout latest nginx-module-shibboleth
         run: >
