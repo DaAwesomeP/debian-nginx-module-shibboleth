@@ -72,10 +72,10 @@ jobs:
         shell: bash
         run: |
           while IFS="" read -r THIS_NGINX_VERSION || [ -n "$THIS_NGINX_VERSION" ]; do
-            printf"\n----------\nSTARTING BUILD: Nginx $THIS_NGINX_VERSION module ${{ steps.nginx-module-shibboleth-latest-release.outputs.version }}\n----------\n\n"
+            printf "\n----------\nSTARTING BUILD: Nginx $THIS_NGINX_VERSION module ${{ steps.nginx-module-shibboleth-latest-release.outputs.version }}\n----------\n\n"
             ./build_module.sh --non-interactive --force-dynamic -v $THIS_NGINX_VERSION --module-version ${{ steps.nginx-module-shibboleth-latest-release.outputs.version }} -o build-module-artifacts  nginx-http-shibboleth
             rm -rf /tmp/build_module.sh.*
-            printf"\n----------\nFINISHED BUILD: Nginx $THIS_NGINX_VERSION module ${{ steps.nginx-module-shibboleth-latest-release.outputs.version }}\n----------\n\n"
+            printf "\n----------\nFINISHED BUILD: Nginx $THIS_NGINX_VERSION module ${{ steps.nginx-module-shibboleth-latest-release.outputs.version }}\n----------\n\n"
           done < nginx-versions-${{ matrix.os.release }}-${{ matrix.nginx-branch.name}}.txt
       - name: SHA256 build artifacts
         shell: bash
