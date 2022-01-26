@@ -1,0 +1,43 @@
+name: Build
+on: 
+ - push
+
+jobs:
+  build-package:
+    name: 'Build Package Debian ${{ matrix.os.release }} Nginx ${{ matrix.nginx-branch.name }}'
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - { release: buster,   arch: amd64, image: "debian:buster"   }
+          - { release: bullseye, arch: amd64, image: "debian:bullseye" }
+        nginx-branch:
+          - { name: stable,   repo-path: ""          }
+          - { name: mainline, repo-path: "mainline/" }
+    runs-on: ubuntu-latest
+    container:
+      image: ${{ matrix.os.image }}
+    steps:
+      # - name: Collect Nginx Package list
+      # - run: wget http://nginx.org/packages/${{ matrix.nginx-branch.repo-path }}debian/dists/${{ matrix.os.release }}/nginx/binary-${{ matrix.os.arch }}/Packages
+      - name: Update APT for repo dependencies
+        run: apt-get update -y
+      - name: Install Nginx repo dependencies
+        run: apt-get install -y curl gnupg2 ca-certificates lsb-release debian-archive-keyring sudo
+      - name: Add Nginx repo key
+        run: >
+          curl https://nginx.org/keys/nginx_signing.key | gpg --dearmor | sudo tee /usr/share/keyrings/nginx-archive-keyring.gpg > /dev/null &&
+          gpg --dry-run --quiet --import --import-options import-show /usr/share/keyrings/nginx-archive-keyring.gpg
+      - name: Add Nginx repo
+        run: >
+          echo "deb [signed-by=/usr/share/keyrings/nginx-archive-keyring.gpg] http://nginx.org/packages/${{ matrix.nginx-branch.repo-path }}debian `lsb_release -cs` nginx" | sudo tee /etc/apt/sources.list.d/nginx.list &&
+          echo -e "Package: *\nPin: origin nginx.org\nPin: release o=nginx\nPin-Priority: 900\n" | sudo tee /etc/apt/preferences.d/99nginx
+      - name: Update APT for Nginx repo
+        run: apt-get update -y
+      - name: Show Nginx APT versions
+      - run: >
+          apt-cache show nginx &&
+          apt-cache showpkg nginx
+      - name: Extract Nginx APT versions
+        run: >
+          apt-cache showpkg nginx | sed -rn 's/^([0-9]+[0-9.]*)-[0-9]+[0-9.]*~${{ matrix.os.release }} \(\/var\/lib\/apt\/lists\/nginx.org.*\)$/\1/p'
