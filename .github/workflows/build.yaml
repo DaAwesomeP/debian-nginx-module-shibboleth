@@ -35,7 +35,7 @@ jobs:
       - name: Update APT for Nginx repo
         run: apt-get update -y
       - name: Show Nginx APT versions
-      - run: >
+        run: >
           apt-cache show nginx &&
           apt-cache showpkg nginx
       - name: Extract Nginx APT versions
