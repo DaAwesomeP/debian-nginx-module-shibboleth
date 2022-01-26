@@ -4,7 +4,7 @@ on:
 
 jobs:
   build-package:
-    name: 'Build Package Debian ${{ matrix.os.release }} Nginx ${{ matrix.nginx-branch.name }}'
+    name: 'Build Packages Debian ${{ matrix.os.release }} Nginx ${{ matrix.nginx-branch.name }}'
     strategy:
       fail-fast: false
       matrix:
@@ -43,3 +43,37 @@ jobs:
       - name: Extract Nginx APT versions
         run: >
           apt-cache showpkg nginx | sed -rn 's/^([0-9]+[0-9.]*)-[0-9]+[0-9.]*~${{ matrix.os.release }} \(\/var\/lib\/apt\/lists\/nginx.org.*\)$/\1/p' 2>&1 | tee nginx-versions-${{ matrix.os.release }}-${{ matrix.nginx-branch.name}}.txt
+      - name: Fetch Nginx pkg-oss
+        run: >
+          wget https://hg.nginx.org/pkg-oss/raw-file/default/build_module.sh &&
+          chmod a+x build_module.sh
+      - name: Clone nginx-module-shibboleth
+        run: >
+          git clone https://github.com/nginx-shib/nginx-http-shibboleth nginx-http-shibboleth
+      - name: Find latest nginx-module-shibboleth
+        id: nginx-module-shibboleth-latest-release
+        run: >
+          cd nginx-http-shibboleth &&
+          echo "::set-output name=releasetag::$(git describe --tags --abbrev=0 | sed -e '/v/s/^.//' 2>&1 | tee ../nginx-module-shibboleth-version.txt)" &&
+          cd ../
+      - name: Checkout latest nginx-module-shibboleth
+        run: >
+          cd nginx-http-shibboleth &&
+          git checkout ${{ steps.nginx-module-shibboleth-latest-release.outputs.releasetag }} &&
+          cd ../
+      - name: Build nginx-module-shibboleth versions
+        shell: bash
+        run: >
+          while IFS="" read -r p || [ -n "$p" ] do
+            ./build_module.sh --non-interactive --force-dynamic -v $NGINX_VERSION --module-version $NGINX_MODULE_SHIBBOLETH_VERSION -o build-module-artifacts  nginx-http-shibboleth
+          done < nginx-versions-${{ matrix.os.release }}-${{ matrix.nginx-branch.name}}.txt
+      - name: SHA256 build artifacts
+        shell: bash
+        run: find . -type f -exec sha256sum {} \;
+        working-directory: build-module-artifacts
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: build-module-artifacts
+          path: ./build-module-artifacts/*
+          
