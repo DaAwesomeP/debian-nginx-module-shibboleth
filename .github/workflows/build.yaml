@@ -58,19 +58,21 @@ jobs:
         id: nginx-module-shibboleth-latest-release
         run: >
           cd nginx-http-shibboleth &&
-          echo "::set-output name=releasetag::$(git describe --tags --abbrev=0 | sed -e '/v/s/^.//' 2>&1 | tee ../nginx-module-shibboleth-version.txt)" &&
+          echo "::set-output name=tag::$(git describe --tags --abbrev=0 | tee ../nginx-module-shibboleth-tag.txt)" &&
+          echo "::set-output name=version::$(git describe --tags --abbrev=0 | sed -e '/v/s/^.//' 2>&1 | tee ../nginx-module-shibboleth-version.txt)" &&
           cd ../ &&
+          sha256sum nginx-module-shibboleth-tag.txt
           sha256sum nginx-module-shibboleth-version.txt
       - name: Checkout latest nginx-module-shibboleth
         run: >
           cd nginx-http-shibboleth &&
-          git checkout ${{ steps.nginx-module-shibboleth-latest-release.outputs.releasetag }} &&
+          git checkout ${{ steps.nginx-module-shibboleth-latest-release.outputs.tag }} &&
           cd ../
       - name: Build nginx-module-shibboleth versions
         shell: bash
         run: >
-          while IFS="" read -r p || [ -n "$p" ] do
-            ./build_module.sh --non-interactive --force-dynamic -v $NGINX_VERSION --module-version $NGINX_MODULE_SHIBBOLETH_VERSION -o build-module-artifacts  nginx-http-shibboleth
+          while IFS="" read -r THIS_NGINX_VERSION || [ -n "$THIS_NGINX_VERSION" ] do
+            ./build_module.sh --non-interactive --force-dynamic -v $THIS_NGINX_VERSION --module-version ${{ steps.nginx-module-shibboleth-latest-release.outputs.version }} -o build-module-artifacts  nginx-http-shibboleth
           done < nginx-versions-${{ matrix.os.release }}-${{ matrix.nginx-branch.name}}.txt
       - name: SHA256 build artifacts
         shell: bash
@@ -83,4 +85,5 @@ jobs:
           path: |
             ./build-module-artifacts/*
             nginx-versions-${{ matrix.os.release }}-${{ matrix.nginx-branch.name}}.txt
+            nginx-module-shibboleth-tag.txt
             nginx-module-shibboleth-version.txt
