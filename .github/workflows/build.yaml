@@ -58,11 +58,11 @@ jobs:
         id: nginx-module-shibboleth-latest-release
         run: >
           cd nginx-http-shibboleth &&
-          echo "::set-output name=tag::$(git describe --tags --abbrev=0 | tee ../nginx-module-shibboleth-tag.txt)" &&
-          echo "::set-output name=version::$(git describe --tags --abbrev=0 | sed -e '/v/s/^.//' 2>&1 | tee ../nginx-module-shibboleth-version.txt)" &&
+          echo "::set-output name=tag::$(git describe --tags --abbrev=0 | tee ../nginx-module-shibboleth-tag-${{ matrix.os.release }}-${{ matrix.nginx-branch.name }}.txt)" &&
+          echo "::set-output name=version::$(git describe --tags --abbrev=0 | sed -e '/v/s/^.//' 2>&1 | tee ../nginx-module-shibboleth-version-${{ matrix.os.release }}-${{ matrix.nginx-branch.name }}.txt)" &&
           cd ../ &&
-          sha256sum nginx-module-shibboleth-tag.txt &&
-          sha256sum nginx-module-shibboleth-version.txt
+          sha256sum nginx-module-shibboleth-tag-${{ matrix.os.release }}-${{ matrix.nginx-branch.name }}.txt &&
+          sha256sum nginx-module-shibboleth-version-${{ matrix.os.release }}-${{ matrix.nginx-branch.name }}.txt
       - name: Checkout latest nginx-module-shibboleth
         run: >
           cd nginx-http-shibboleth &&
