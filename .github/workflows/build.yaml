@@ -27,7 +27,7 @@ jobs:
       - name: Add Nginx repo key
         run: >
           curl https://nginx.org/keys/nginx_signing.key | gpg --dearmor | sudo tee /usr/share/keyrings/nginx-archive-keyring.gpg > /dev/null &&
-          gpg /usr/share/keyrings/nginx-archive-keyring.gpg
+          gpg --dry-run --list-options show-keyring /usr/share/keyrings/nginx-archive-keyring.gpg
       - name: Add Nginx repo
         run: >
           echo "deb [signed-by=/usr/share/keyrings/nginx-archive-keyring.gpg] http://nginx.org/packages/${{ matrix.nginx-branch.repo-path }}debian `lsb_release -cs` nginx" | sudo tee /etc/apt/sources.list.d/nginx.list &&
@@ -40,4 +40,4 @@ jobs:
           apt-cache showpkg nginx
       - name: Extract Nginx APT versions
         run: >
-          apt-cache showpkg nginx | sed -rn 's/^([0-9]+[0-9.]*)-[0-9]+[0-9.]*~${{ matrix.os.release }} \(\/var\/lib\/apt\/lists\/nginx.org.*\)$/\1/p'
+          apt-cache showpkg nginx | sed -rn 's/^([0-9]+[0-9.]*)-[0-9]+[0-9.]*~${{ matrix.os.release }} \(\/var\/lib\/apt\/lists\/nginx.org.*\)$/\1/p' 2>&1 | tee nginx-versions-${{ matrix.os.release }}.txt
