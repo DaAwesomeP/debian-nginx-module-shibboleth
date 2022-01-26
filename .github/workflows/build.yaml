@@ -42,11 +42,13 @@ jobs:
           apt-cache showpkg nginx
       - name: Extract Nginx APT versions
         run: >
-          apt-cache showpkg nginx | sed -rn 's/^([0-9]+[0-9.]*)-[0-9]+[0-9.]*~${{ matrix.os.release }} \(\/var\/lib\/apt\/lists\/nginx.org.*\)$/\1/p' 2>&1 | tee nginx-versions-${{ matrix.os.release }}-${{ matrix.nginx-branch.name}}.txt
+          apt-cache showpkg nginx | sed -rn 's/^([0-9]+[0-9.]*)-[0-9]+[0-9.]*~${{ matrix.os.release }} \(\/var\/lib\/apt\/lists\/nginx.org.*\)$/\1/p' 2>&1 | tee nginx-versions-${{ matrix.os.release }}-${{ matrix.nginx-branch.name}}.txt &&
+          sha256sum nginx-versions-${{ matrix.os.release }}-${{ matrix.nginx-branch.name}}.txt
       - name: Fetch Nginx pkg-oss
         run: >
-          wget https://hg.nginx.org/pkg-oss/raw-file/default/build_module.sh &&
-          chmod a+x build_module.sh
+          curl https://hg.nginx.org/pkg-oss/raw-file/default/build_module.sh --output build_module.sh &&
+          chmod a+x build_module.sh &&
+          sha256sum build_module.sh
       - name: Clone nginx-module-shibboleth
         run: >
           git clone https://github.com/nginx-shib/nginx-http-shibboleth nginx-http-shibboleth
@@ -55,7 +57,8 @@ jobs:
         run: >
           cd nginx-http-shibboleth &&
           echo "::set-output name=releasetag::$(git describe --tags --abbrev=0 | sed -e '/v/s/^.//' 2>&1 | tee ../nginx-module-shibboleth-version.txt)" &&
-          cd ../
+          cd ../ &&
+          sha256sum nginx-module-shibboleth-version.txt
       - name: Checkout latest nginx-module-shibboleth
         run: >
           cd nginx-http-shibboleth &&
@@ -75,5 +78,7 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: build-module-artifacts
-          path: ./build-module-artifacts/*
-          
+          path: |
+            ./build-module-artifacts/*
+            nginx-versions-${{ matrix.os.release }}-${{ matrix.nginx-branch.name}}.txt
+            nginx-module-shibboleth-version.txt
