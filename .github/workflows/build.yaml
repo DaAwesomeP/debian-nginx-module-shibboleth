@@ -84,36 +84,36 @@ jobs:
       - name: Upload build artifacts (this build)
         uses: actions/upload-artifact@v2
         with:
-          name: build-module-artifacts-${{ matrix.os.release }}-${{ matrix.nginx-branch.name}
+          name: build-module-artifacts-${{ matrix.os.release }}-${{ matrix.nginx-branch.name }}
           path: |
             ./build-module-artifacts/*
-            nginx-versions-${{ matrix.os.release }}-${{ matrix.nginx-branch.name}}.txt
-            nginx-module-shibboleth-tag-${{ matrix.os.release }}-${{ matrix.nginx-branch.name}}.txt
-            nginx-module-shibboleth-version-${{ matrix.os.release }}-${{ matrix.nginx-branch.name}}.txt
+            nginx-versions-${{ matrix.os.release }}-${{ matrix.nginx-branch.name }}.txt
+            nginx-module-shibboleth-tag-${{ matrix.os.release }}-${{ matrix.nginx-branch.name }}.txt
+            nginx-module-shibboleth-version-${{ matrix.os.release }}-${{ matrix.nginx-branch.name }}.txt
       - name: Upload build artifacts (this OS release)
         uses: actions/upload-artifact@v2
         with:
           name: build-module-artifacts-${{ matrix.os.release }}
           path: |
             ./build-module-artifacts/*
-            nginx-versions-${{ matrix.os.release }}-${{ matrix.nginx-branch.name}}.txt
-            nginx-module-shibboleth-tag-${{ matrix.os.release }}-${{ matrix.nginx-branch.name}}.txt
-            nginx-module-shibboleth-version-${{ matrix.os.release }}-${{ matrix.nginx-branch.name}}.txt
+            nginx-versions-${{ matrix.os.release }}-${{ matrix.nginx-branch.name }}.txt
+            nginx-module-shibboleth-tag-${{ matrix.os.release }}-${{ matrix.nginx-branch.name }}.txt
+            nginx-module-shibboleth-version-${{ matrix.os.release }}-${{ matrix.nginx-branch.name }}.txt
       - name: Upload build artifacts (this Nginx branch)
         uses: actions/upload-artifact@v2
         with:
-          name: build-module-artifacts-${{ matrix.nginx-branch.name}}
+          name: build-module-artifacts-${{ matrix.nginx-branch.name }}
           path: |
             ./build-module-artifacts/*
-            nginx-versions-${{ matrix.os.release }}-${{ matrix.nginx-branch.name}}.txt
-            nginx-module-shibboleth-tag-${{ matrix.os.release }}-${{ matrix.nginx-branch.name}}.txt
-            nginx-module-shibboleth-version-${{ matrix.os.release }}-${{ matrix.nginx-branch.name}}.txt
+            nginx-versions-${{ matrix.os.release }}-${{ matrix.nginx-branch.name }}.txt
+            nginx-module-shibboleth-tag-${{ matrix.os.release }}-${{ matrix.nginx-branch.name }}.txt
+            nginx-module-shibboleth-version-${{ matrix.os.release }}-${{ matrix.nginx-branch.name }}.txt
       - name: Upload build artifacts (all combined)
         uses: actions/upload-artifact@v2
         with:
           name: build-module-artifacts
           path: |
             ./build-module-artifacts/*
-            nginx-versions-${{ matrix.os.release }}-${{ matrix.nginx-branch.name}}.txt
-            nginx-module-shibboleth-tag-${{ matrix.os.release }}-${{ matrix.nginx-branch.name}}.txt
-            nginx-module-shibboleth-version-${{ matrix.os.release }}-${{ matrix.nginx-branch.name}}.txt
+            nginx-versions-${{ matrix.os.release }}-${{ matrix.nginx-branch.name }}.txt
+            nginx-module-shibboleth-tag-${{ matrix.os.release }}-${{ matrix.nginx-branch.name }}.txt
+            nginx-module-shibboleth-version-${{ matrix.os.release }}-${{ matrix.nginx-branch.name }}.txt
