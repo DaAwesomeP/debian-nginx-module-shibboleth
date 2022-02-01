@@ -136,3 +136,23 @@ jobs:
       - name: Display structure of artifacts
         run: ls -R
         working-directory: artifacts
+      - name: Checkout existing repo
+        - uses: actions/checkout@v2
+          with:
+            ref: gh-pages
+            path: gh-pages
+      - name: Display existing structure of gh-pages
+        run: ls -R
+        working-directory: gh-pages
+      - name: Create initial folders if not exist
+        run: >
+          mkdir -p packages/debian/conf &&
+          mkdir -p packages/mainline/debian/conf
+      - name: Create or update distribution files
+        shell: bash
+        run: |
+          for filepath in ./artifacts/*.txt; do
+            [ -e "$filepath" ] || continue
+            THIS_FILENAME=$(basename "$filepath" .txt)
+            printf "$THIS_FILENAME\n"
+          done
