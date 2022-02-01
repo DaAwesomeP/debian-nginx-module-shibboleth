@@ -137,10 +137,10 @@ jobs:
         run: ls -R
         working-directory: artifacts
       - name: Checkout existing repo
-        - uses: actions/checkout@v2
-          with:
-            ref: gh-pages
-            path: gh-pages
+        uses: actions/checkout@v2
+        with:
+          ref: gh-pages
+          path: gh-pages
       - name: Display existing structure of gh-pages
         run: ls -R
         working-directory: gh-pages
