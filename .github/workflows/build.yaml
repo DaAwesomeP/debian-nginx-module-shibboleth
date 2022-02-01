@@ -18,8 +18,6 @@ jobs:
     container:
       image: ${{ matrix.os.image }}
     steps:
-      # - name: Collect Nginx Package list
-      # - run: wget http://nginx.org/packages/${{ matrix.nginx-branch.repo-path }}debian/dists/${{ matrix.os.release }}/nginx/binary-${{ matrix.os.arch }}/Packages
       - name: Update APT for repo dependencies
         run: apt-get update -y
       - name: Install Nginx repo dependencies
@@ -88,7 +86,7 @@ jobs:
       - name: Upload build artifacts (this build)
         uses: actions/upload-artifact@v2
         with:
-          name: build-module-artifacts-debian_${{ matrix.os.release }}-${{ matrix.nginx-branch.name }}
+          name: build-module-artifacts-debian_${{ matrix.os.release }}-nginx_${{ matrix.nginx-branch.name }}
           path: |
             ./build-module-artifacts/*
             nginx-versions-debian_${{ matrix.os.release }}-nginx_${{ matrix.nginx-branch.name }}.txt
@@ -97,7 +95,7 @@ jobs:
       - name: Upload build artifacts (this OS release)
         uses: actions/upload-artifact@v2
         with:
-          name: build-module-artifacts-${{ matrix.os.release }}
+          name: build-module-artifacts-debian_${{ matrix.os.release }}
           path: |
             ./build-module-artifacts/*
             nginx-versions-debian_${{ matrix.os.release }}-nginx_${{ matrix.nginx-branch.name }}.txt
@@ -106,7 +104,7 @@ jobs:
       - name: Upload build artifacts (this Nginx branch)
         uses: actions/upload-artifact@v2
         with:
-          name: build-module-artifacts-${{ matrix.nginx-branch.name }}
+          name: build-module-artifacts-nginx_${{ matrix.nginx-branch.name }}
           path: |
             ./build-module-artifacts/*
             nginx-versions-debian_${{ matrix.os.release }}-nginx_${{ matrix.nginx-branch.name }}.txt
@@ -121,3 +119,20 @@ jobs:
             nginx-versions-debian_${{ matrix.os.release }}-nginx_${{ matrix.nginx-branch.name }}.txt
             nginx-module-shibboleth-tag-debian_${{ matrix.os.release }}-nginx_${{ matrix.nginx-branch.name }}.txt
             nginx-module-shibboleth-version-debian_${{ matrix.os.release }}-nginx_${{ matrix.nginx-branch.name }}.txt
+  publish-packages:
+    needs: [build-package]
+    runs-on: ubuntu-latest
+    container:
+      image: debian:bullseye
+    steps:
+      - name: Update APT for reprepro
+        run: apt-get update -y
+      - name: Install reprepro
+        run: apt-get install -y reprepro
+      - uses: actions/download-artifact@v2
+        with:
+          name: build-module-artifacts
+          path: artifacts
+      - name: Display structure of artifacts
+        run: ls -R
+        working-directory: artifacts
