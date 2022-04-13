@@ -15,8 +15,8 @@ jobs:
           - { name: stable,   repo-path: ""          }
           - { name: mainline, repo-path: "mainline/" }
         module:
-          - { name: nginx-module-shibboleth,   repo: https://github.com/nginx-shib/nginx-http-shibboleth    }
-          - { name: headers-more-nginx-module, repo: https://github.com/openresty/headers-more-nginx-module }
+          - { name: nginx-module-shibboleth,   repo: "https://github.com/nginx-shib/nginx-http-shibboleth"    }
+          - { name: headers-more-nginx-module, repo: "https://github.com/openresty/headers-more-nginx-module" }
     runs-on: ubuntu-latest
     container:
       image: ${{ matrix.os.image }}
