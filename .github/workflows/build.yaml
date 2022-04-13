@@ -14,6 +14,9 @@ jobs:
         nginx-branch:
           - { name: stable,   repo-path: ""          }
           - { name: mainline, repo-path: "mainline/" }
+        module:
+          - { name: nginx-module-shibboleth,   repo: https://github.com/nginx-shib/nginx-http-shibboleth    }
+          - { name: headers-more-nginx-module, repo: https://github.com/openresty/headers-more-nginx-module }
     runs-on: ubuntu-latest
     container:
       image: ${{ matrix.os.image }}
@@ -53,31 +56,31 @@ jobs:
           sha256sum build_module.sh
       - name: Install git
         run: apt-get install -y git
-      - name: Clone nginx-module-shibboleth
+      - name: Clone ${{ matrix.module.name }}
         run: >
-          git clone https://github.com/nginx-shib/nginx-http-shibboleth nginx-http-shibboleth
-      - name: Find latest nginx-module-shibboleth
-        id: nginx-module-shibboleth-latest-release
+          git clone ${{ matrix.module.repo }} ${{ matrix.module.name }}
+      - name: Find latest ${{ matrix.module.name }}
+        id: module-repo-latest-release
         run: >
-          cd nginx-http-shibboleth &&
-          echo "::set-output name=tag::$(git describe --tags --abbrev=0 | tee ../nginx-module-shibboleth-tag-debian_${{ matrix.os.release }}-nginx_${{ matrix.nginx-branch.name }}.txt)" &&
-          echo "::set-output name=version::$(git describe --tags --abbrev=0 | sed -e '/v/s/^.//' | tee ../nginx-module-shibboleth-version-debian_${{ matrix.os.release }}-nginx_${{ matrix.nginx-branch.name }}.txt)" &&
+          cd ${{ matrix.module.name }} &&
+          echo "::set-output name=tag::$(git describe --tags --abbrev=0 | tee ../${{ matrix.module.name }}-tag-debian_${{ matrix.os.release }}-nginx_${{ matrix.nginx-branch.name }}.txt)" &&
+          echo "::set-output name=version::$(git describe --tags --abbrev=0 | sed -e '/v/s/^.//' | tee ../${{ matrix.module.name }}-version-debian_${{ matrix.os.release }}-nginx_${{ matrix.nginx-branch.name }}.txt)" &&
           cd ../ &&
-          sha256sum nginx-module-shibboleth-tag-debian_${{ matrix.os.release }}-nginx_${{ matrix.nginx-branch.name }}.txt &&
-          sha256sum nginx-module-shibboleth-version-debian_${{ matrix.os.release }}-nginx_${{ matrix.nginx-branch.name }}.txt
-      - name: Checkout latest nginx-module-shibboleth
+          sha256sum ${{ matrix.module.name }}-tag-debian_${{ matrix.os.release }}-nginx_${{ matrix.nginx-branch.name }}.txt &&
+          sha256sum ${{ matrix.module.name }}-version-debian_${{ matrix.os.release }}-nginx_${{ matrix.nginx-branch.name }}.txt
+      - name: Checkout latest ${{ matrix.module.name }}
         run: >
-          cd nginx-http-shibboleth &&
-          git checkout ${{ steps.nginx-module-shibboleth-latest-release.outputs.tag }} &&
+          cd ${{ matrix.module.name }} &&
+          git checkout ${{ steps.module-repo-latest-release.outputs.tag }} &&
           cd ../
-      - name: Build nginx-module-shibboleth versions
+      - name: Build ${{ matrix.module.name }} versions
         shell: bash
         run: |
           while IFS="" read -r THIS_NGINX_VERSION || [ -n "$THIS_NGINX_VERSION" ]; do
-            printf "\n----------\nSTARTING BUILD: Nginx $THIS_NGINX_VERSION module ${{ steps.nginx-module-shibboleth-latest-release.outputs.version }}\n----------\n\n"
-            ./build_module.sh --non-interactive --force-dynamic -v $THIS_NGINX_VERSION --module-version ${{ steps.nginx-module-shibboleth-latest-release.outputs.version }} -o build-module-artifacts  nginx-http-shibboleth
+            printf "\n----------\nSTARTING BUILD: Nginx $THIS_NGINX_VERSION module ${{ steps.module-repo-latest-release.outputs.version }}\n----------\n\n"
+            ./build_module.sh --non-interactive --force-dynamic -v $THIS_NGINX_VERSION --module-version ${{ steps.module-repo-latest-release.outputs.version }} -o build-module-artifacts  ${{ matrix.module.name }}
             rm -rf /tmp/build_module.sh.*
-            printf "\n----------\nFINISHED BUILD: Nginx $THIS_NGINX_VERSION module ${{ steps.nginx-module-shibboleth-latest-release.outputs.version }}\n----------\n\n"
+            printf "\n----------\nFINISHED BUILD: Nginx $THIS_NGINX_VERSION module ${{ steps.module-repo-latest-release.outputs.version }}\n----------\n\n"
           done < nginx-versions-debian_${{ matrix.os.release }}-${{ matrix.nginx-branch.name}}.txt
       - name: SHA256 build artifacts
         shell: bash
@@ -90,8 +93,8 @@ jobs:
           path: |
             ./build-module-artifacts/*
             nginx-versions-debian_${{ matrix.os.release }}-nginx_${{ matrix.nginx-branch.name }}.txt
-            nginx-module-shibboleth-tag-debian_${{ matrix.os.release }}-nginx_${{ matrix.nginx-branch.name }}.txt
-            nginx-module-shibboleth-version-debian_${{ matrix.os.release }}-nginx_${{ matrix.nginx-branch.name }}.txt
+            ${{ matrix.module.name }}-tag-debian_${{ matrix.os.release }}-nginx_${{ matrix.nginx-branch.name }}.txt
+            ${{ matrix.module.name }}-version-debian_${{ matrix.os.release }}-nginx_${{ matrix.nginx-branch.name }}.txt
       - name: Upload build artifacts (this OS release)
         uses: actions/upload-artifact@v2
         with:
@@ -99,8 +102,8 @@ jobs:
           path: |
             ./build-module-artifacts/*
             nginx-versions-debian_${{ matrix.os.release }}-nginx_${{ matrix.nginx-branch.name }}.txt
-            nginx-module-shibboleth-tag-debian_${{ matrix.os.release }}-nginx_${{ matrix.nginx-branch.name }}.txt
-            nginx-module-shibboleth-version-debian_${{ matrix.os.release }}-nginx_${{ matrix.nginx-branch.name }}.txt
+            ${{ matrix.module.name }}-tag-debian_${{ matrix.os.release }}-nginx_${{ matrix.nginx-branch.name }}.txt
+            ${{ matrix.module.name }}-version-debian_${{ matrix.os.release }}-nginx_${{ matrix.nginx-branch.name }}.txt
       - name: Upload build artifacts (this Nginx branch)
         uses: actions/upload-artifact@v2
         with:
@@ -108,8 +111,8 @@ jobs:
           path: |
             ./build-module-artifacts/*
             nginx-versions-debian_${{ matrix.os.release }}-nginx_${{ matrix.nginx-branch.name }}.txt
-            nginx-module-shibboleth-tag-debian_${{ matrix.os.release }}-nginx_${{ matrix.nginx-branch.name }}.txt
-            nginx-module-shibboleth-version-debian_${{ matrix.os.release }}-nginx_${{ matrix.nginx-branch.name }}.txt
+            ${{ matrix.module.name }}-tag-debian_${{ matrix.os.release }}-nginx_${{ matrix.nginx-branch.name }}.txt
+            ${{ matrix.module.name }}-version-debian_${{ matrix.os.release }}-nginx_${{ matrix.nginx-branch.name }}.txt
       - name: Upload build artifacts (all combined)
         uses: actions/upload-artifact@v2
         with:
@@ -117,8 +120,8 @@ jobs:
           path: |
             ./build-module-artifacts/*
             nginx-versions-debian_${{ matrix.os.release }}-nginx_${{ matrix.nginx-branch.name }}.txt
-            nginx-module-shibboleth-tag-debian_${{ matrix.os.release }}-nginx_${{ matrix.nginx-branch.name }}.txt
-            nginx-module-shibboleth-version-debian_${{ matrix.os.release }}-nginx_${{ matrix.nginx-branch.name }}.txt
+            ${{ matrix.module.name }}-tag-debian_${{ matrix.os.release }}-nginx_${{ matrix.nginx-branch.name }}.txt
+            ${{ matrix.module.name }}-version-debian_${{ matrix.os.release }}-nginx_${{ matrix.nginx-branch.name }}.txt
   publish-packages:
     needs: [build-package]
     runs-on: ubuntu-latest
