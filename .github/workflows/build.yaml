@@ -4,7 +4,7 @@ on:
 
 jobs:
   build-package:
-    name: 'Build Packages Debian ${{ matrix.os.release }} Nginx ${{ matrix.nginx-branch.name }}'
+    name: 'Build ${{ matrix.module.name }} Debian ${{ matrix.os.release }} Nginx ${{ matrix.nginx-branch.name }}'
     strategy:
       fail-fast: false
       matrix:
