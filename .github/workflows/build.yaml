@@ -176,8 +176,8 @@ jobs:
           Description: nginx additional modules apt repository
           EOF
       - name: Update Packages.gz file
-      - shell: bash
-      - run: dpkg-scanpackages -m gh-pages | gzip --fast > Packages.gz
+        shell: bash
+        run: dpkg-scanpackages -m gh-pages | gzip --fast > Packages.gz
         # run: |
         #   for filepath in ./artifacts/*.txt; do
         #     [ -e "$filepath" ] || continue
