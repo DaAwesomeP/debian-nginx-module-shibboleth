@@ -1,6 +1,8 @@
 name: Build
-on: 
- - push
+on:
+  push:
+    branches:
+      - main
 
 jobs:
   build-package:
@@ -16,7 +18,7 @@ jobs:
           - { name: mainline, repo-path: "mainline/" }
         module:
           - { name: nginx-module-shibboleth,   repo: "https://github.com/nginx-shib/nginx-http-shibboleth"    }
-          - { name: headers-more-nginx-module, repo: "https://github.com/openresty/headers-more-nginx-module" }
+          - { name: nginx-module-headersmore,  repo: "https://github.com/openresty/headers-more-nginx-module" }
     runs-on: ubuntu-latest
     container:
       image: ${{ matrix.os.image }}
@@ -149,13 +151,36 @@ jobs:
         working-directory: gh-pages
       - name: Create initial folders if not exist
         run: >
-          mkdir -p packages/debian/conf &&
-          mkdir -p packages/mainline/debian/conf
+          mkdir -p gh-pages/packages/debian/conf &&
+          mkdir -p gh-pages/packages/mainline/debian/conf
       - name: Create or update distribution files
         shell: bash
-        run: |
-          for filepath in ./artifacts/*.txt; do
-            [ -e "$filepath" ] || continue
-            THIS_FILENAME=$(basename "$filepath" .txt)
-            printf "$THIS_FILENAME\n"
-          done
+        run: >
+          tee packages/debian/conf/distributions packages/mainline/debian/conf/distributions > /dev/null <<EOF
+          Origin: nginx-additional-modules
+          Label: nginx-additional-modules
+          Suite: stable
+          Codename: buster
+          Version: 10.0
+          Architectures: amd64
+          Components: nginx
+          Description: nginx additional modules apt repository
+
+          Origin: nginx-additional-modules
+          Label: nginx-additional-modules
+          Suite: stable
+          Codename: bullseye
+          Version: 11.0
+          Architectures: amd64
+          Components: nginx
+          Description: nginx additional modules apt repository
+          EOF
+      - name: Update Packages.gz file
+      - shell: bash
+      - run: dpkg-scanpackages -m gh-pages | gzip --fast > Packages.gz
+        # run: |
+        #   for filepath in ./artifacts/*.txt; do
+        #     [ -e "$filepath" ] || continue
+        #     THIS_FILENAME=$(basename "$filepath.txt")
+        #     printf "$THIS_FILENAME\n"
+        #   done
